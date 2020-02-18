@@ -127,7 +127,7 @@ public class Main {
 					BufferedReader reader = null;
 
 					if (m.builtin) {
-						// this doesn't work in the ide
+						// this doesn't work for some reason. FileNotFoundException
 						reader = new BufferedReader(new FileReader(m.file));
 					} else {
 						try {
