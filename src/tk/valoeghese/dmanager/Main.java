@@ -76,10 +76,14 @@ public class Main {
 
 		String initial;
 
-		try (FileInputStream fis = new FileInputStream(backupFile)) {
-			byte[] data = new byte[(int) backupFile.length()];
+		try (FileInputStream fis = new FileInputStream(mainFile)) {
+			byte[] data = new byte[(int) mainFile.length()];
 			fis.read(data);
 			initial = new String(data, "UTF-8");
+			
+			if (initial.isEmpty()) {
+				throw new RuntimeException("read contents of vanilla discord_modules/index.js is empty! perhaps this is a bug in the program?");
+			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
