@@ -65,22 +65,22 @@ public class Main {
 			if (backupFile.createNewFile()) {
 				try (FileOutputStream foss = new FileOutputStream(backupFile)) { // haha get it "FOSS" FileOutputStream (fos)
 					try (FileInputStream arr = new FileInputStream(mainFile)) { // here, labeling my variables very well
-						FileChannel destination = foss.getChannel();           // the words in that previous comment were in alphabetical order
-						destination.transferFrom(arr.getChannel(), 0, destination.size());
+						FileChannel source = arr.getChannel();                 // the words in that previous comment were in alphabetical order
+						foss.getChannel().transferFrom(source, 0, source.size());
 					}
 				}
 			}
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 
 		String initial;
 
-		try (FileInputStream fis = new FileInputStream(mainFile)) {
-			byte[] data = new byte[(int) mainFile.length()];
+		try (FileInputStream fis = new FileInputStream(backupFile)) {
+			byte[] data = new byte[(int) backupFile.length()];
 			fis.read(data);
 			initial = new String(data, "UTF-8");
-			
+
 			if (initial.isEmpty()) {
 				throw new RuntimeException("read contents of vanilla discord_modules/index.js is empty! perhaps this is a bug in the program?");
 			}
@@ -95,6 +95,11 @@ public class Main {
 
 		try (PrintWriter writer = new PrintWriter(mainFile)) {
 			writer.print(initial);
+			writer.println();
+
+			if (!initial.endsWith("\n")) {
+				writer.println();
+			}
 			writer.println("// DManager: Plugins Start ======================");
 			writer.println();
 
