@@ -104,52 +104,56 @@ public class Main {
 			writer.println();
 
 			while (remainingPasses --> 0) {
-				List<Integer> installedIndexes = new ArrayList<>(); // array indexes of ones installed this session
+				List<Integer> installedIndices = new ArrayList<>(); // array indexes of ones installed this session
 
 				moduleLoop: for (int index = 0; index < remaining.size(); ++index) {
 					Module m = remaining.get(index);
-
+					System.out.println("module");
+					System.out.println(m.id);
+					System.out.println("missing dependencies");
 					for (String dependency : m.dependencies) {
 						// check if dependencies are installed
 						if (!installed.contains(dependency)) {
+							System.out.println(dependency);
 							continue moduleLoop; // does using labels count as "hacky code"
 						}
+					}
 
-						// install module
-						writer.println("// DManager: plugin <" + m.id + ">");
+					// install module
+					System.out.println("installing" + m.id);
+					writer.println("// DManager: plugin <" + m.id + ">");
 
-						// copy contents to the file
-						BufferedReader reader = null;
+					// copy contents to the file
+					BufferedReader reader = null;
 
-						if (m.builtin) {
-							reader = new BufferedReader(new FileReader(m.file));
-						} else {
-							try {
-								reader = new BufferedReader(new InputStreamReader(m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js"))));
-							} catch (IOException e) {
-								alertCritial(e, writer);
-							}
-						}
-
-						String lineIn;
-
+					if (m.builtin) {
+						reader = new BufferedReader(new FileReader(m.file));
+					} else {
 						try {
-							while ((lineIn = reader.readLine()) != null) {
-								writer.println(lineIn);
-								reader.close();
-							}
+							reader = new BufferedReader(new InputStreamReader(m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js"))));
 						} catch (IOException e) {
 							alertCritial(e, writer);
 						}
-
-						// blank line between plugins
-						writer.println();
-						installed.add(m.id);
-						installedIndexes.add(index);
 					}
+
+					String lineIn;
+
+					try {
+						while ((lineIn = reader.readLine()) != null) {
+							writer.println(lineIn);
+							reader.close();
+						}
+					} catch (IOException e) {
+						alertCritial(e, writer);
+					}
+
+					// blank line between plugins
+					writer.println();
+					installed.add(m.id);
+					installedIndices.add(index);
 				}
 
-				for (Integer index : installedIndexes) {
+				for (Integer index : installedIndices) {
 					remaining.remove(index.intValue());
 				}
 
