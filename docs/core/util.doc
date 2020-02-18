@@ -1,0 +1,26 @@
+DOC core.util;
+
+/**
+ * @return (HtmlElement): the element representing the server name in the top right corner.
+ */
+function getServerElement();
+
+/**
+ * @return (string): the name of the server. May be altered by other scripts.
+ */
+function getServer();
+
+/**
+ * @return (Collection<HtmlElement>): a collection of elements representing the channels currently in view.
+ */
+function getChannelElements();
+
+/**
+ * @return (HtmlElement): the element representing the server name at the top of the display.
+ */
+function getChannelTitleElement();
+
+/**
+ * @return (HtmlElement): the element representing the placeholder for typed text in the text msg box.
+ */
+function getPlaceholderMessage();

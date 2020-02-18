@@ -1,0 +1,26 @@
+DOC core.event;
+DEPENDENCIES [core.util];
+
+/**
+ * Subscribes a callback to the event for renaming channels.
+ * @param 0 callback: the event callback
+ * @return (void)
+ *
+ * @CallbackSchema {
+ *    @param 0 id: the id of the channel, in the format servername:channelname
+ *    @param 1 name: the name of the channel, as modified by previous renameChannel subscribers
+ *    @return (string): the modified name of the channel
+ * }
+ */
+function subscribeRenameChannel(callback);
+
+/**
+ * Subscribes a callback to the main loop event
+ * @param 0 callback: the event callback
+ * @return (void)
+ *
+ * @CallbackSchema {
+ *    @return (void)
+ * }
+ */
+function subscribeMainLoop(callback);
