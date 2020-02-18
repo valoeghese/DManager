@@ -172,7 +172,7 @@ public class Main {
 	}
 
 	private static void loadResource(ZipFile zip) throws IOException {
-		try (InputStream is = zip.getInputStream(zip.getEntry("plugin.data"))) {
+		try (InputStream is = zip.getInputStream(zip.getEntry("plugin.meta"))) {
 			Scanner sc = new Scanner(is);
 			String[] dependencies = new String[0];
 			String resourceLocation = null;
@@ -182,7 +182,7 @@ public class Main {
 
 				if (lineData.length >= 2 && !lineData[0].startsWith("#")) {
 					switch (lineData[0].trim()) {
-					case "depends":
+					case "dependencies":
 						dependencies = lineData[1].trim().split(" ");
 						break;
 					case "id":
