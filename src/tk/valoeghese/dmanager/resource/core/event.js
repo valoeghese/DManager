@@ -37,8 +37,10 @@ function _renameChannel(id, channel, prefix) {
 		var newName = _channelNameMap[oldName];
 		
 		if (newName == null) { // if there is no mapped entry for channel name, add one
+			newName = oldName;
+			
 			for (var me = 0; me < _rcs.length; ++me) { // bet you were expecting 'i', but NO! it was me :P
-				newName = _rcs[me](id, me);
+				newName = _rcs[me](id, newName);
 			}
 			
 			_channelNameMap[oldName] = newName;

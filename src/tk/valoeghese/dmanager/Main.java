@@ -137,7 +137,6 @@ public class Main {
 					}
 
 					// copy contents from plugin js file to the discord file
-
 					try (BufferedReader reader = openBufferedReader(m.builtin ? m.file.openStream() : m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js")))) {
 						String lineIn;
 
