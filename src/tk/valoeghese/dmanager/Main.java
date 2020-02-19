@@ -10,8 +10,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,24 +122,12 @@ public class Main {
 					writer.println("// DManager: plugin <" + m.id + ">");
 
 					// copy contents from plugin js file to the discord file
-					BufferedReader reader = null;
+					
+					try (BufferedReader reader = openBufferedReader(m.builtin ? m.file.openStream() : m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js")))) {
+						String lineIn;
 
-					if (m.builtin) {
-						reader = new BufferedReader(new InputStreamReader(m.inputStream));
-					} else {
-						try {
-							reader = new BufferedReader(new InputStreamReader(m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js"))));
-						} catch (IOException e) {
-							alertCritial(e, writer);
-						}
-					}
-
-					String lineIn;
-
-					try {
 						while ((lineIn = reader.readLine()) != null) {
 							writer.println(lineIn);
-							reader.close();
 						}
 					} catch (IOException e) {
 						alertCritial(e, writer);
@@ -149,6 +139,7 @@ public class Main {
 					installedIndices.add(index);
 				}
 
+				installedIndices.sort((a, b) -> b - a);
 				for (Integer index : installedIndices) {
 					remaining.remove(index.intValue());
 				}
@@ -164,6 +155,10 @@ public class Main {
 		} catch (FileNotFoundException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+	
+	private static BufferedReader openBufferedReader(InputStream is) throws IOException {
+		return new BufferedReader(new InputStreamReader(is));
 	}
 
 	private static void alertCritial(IOException e, PrintWriter writer) throws UncheckedIOException {
@@ -206,10 +201,10 @@ public class Main {
 		Module module = new Module();
 
 		if (dmanagerBuiltin) {
-			module.inputStream = Main.class.getClassLoader().getResourceAsStream("tk/valoeghese/dmanager/resource/" + resourceLocation.replace('.', '/') + ".js");
+			module.file = Main.class.getClassLoader().getResource("tk/valoeghese/dmanager/resource/" + resourceLocation.replace('.', '/') + ".js");
 
-			if (module.inputStream == null) {
-				throw new RuntimeException("Cannot load InputStream for plugin " + resourceLocation + "!");
+			if (module.file == null) {
+				throw new RuntimeException("Cannot load URL for plugin " + resourceLocation + "!");
 			}
 		}
 
@@ -231,7 +226,7 @@ public class Main {
 
 class Module {
 	ZipFile zipFile; // external module only
-	InputStream inputStream; // internal module only
+	URL file; // internal module only
 	String[] dependencies; // common
 	boolean builtin; // common
 	String id; // common
