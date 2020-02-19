@@ -36,7 +36,7 @@ function _renameChannel(id, channel, prefix) {
 		var oldName = channel.innerHTML.substring(prefix.length); // deal with the Message # thing in case of the placeholder
 		var newName = _channelNameMap[oldName];
 		
-		if (newName == null) { // if there is no mapped entry for channel name, add one
+		if (newName == undefined) { // if there is no mapped entry for channel name, add one
 			newName = oldName;
 			
 			for (var me = 0; me < _rcs.length; ++me) { // bet you were expecting 'i', but NO! it was me :P
