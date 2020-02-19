@@ -13,7 +13,6 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,9 @@ public class Main {
 
 		File pluginsFolder = new File("plugins/");
 
-		if (!pluginsFolder.mkdir()) { // if not created then there are already plugins installed
+		if (pluginsFolder.mkdir()) { // if not created then there are already plugins installed
+			return;
+		} else {
 			// load plugins
 			for (File file : pluginsFolder.listFiles()) {
 				if (!file.isDirectory() && file.getName().endsWith(".zip")) { // check is a zip (if a user tries to install a png image file called yeet.zip it's their fault)
@@ -121,8 +122,22 @@ public class Main {
 					System.out.println("Installing " + m.id);
 					writer.println("// DManager: plugin <" + m.id + ">");
 
+					int depCount = m.dependencies.length;
+
+					if (depCount > 1) {
+						StringBuilder sb = new StringBuilder("// depends on ");
+
+						for (String d : m.dependencies) {
+							sb.append(d);
+						}
+
+						writer.println(sb.toString());
+					} else if (depCount == 1) {
+						writer.println("// depends on " + m.dependencies[0]);
+					}
+
 					// copy contents from plugin js file to the discord file
-					
+
 					try (BufferedReader reader = openBufferedReader(m.builtin ? m.file.openStream() : m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js")))) {
 						String lineIn;
 
@@ -156,7 +171,7 @@ public class Main {
 			throw new UncheckedIOException(e);
 		}
 	}
-	
+
 	private static BufferedReader openBufferedReader(InputStream is) throws IOException {
 		return new BufferedReader(new InputStreamReader(is));
 	}

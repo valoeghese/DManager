@@ -1,5 +1,3 @@
-// depends on core.util
-
 var _rcs = []; // rename channel subscribers
 var _mls = []; // main loop subscribers
 
