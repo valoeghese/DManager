@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -108,27 +107,23 @@ public class Main {
 
 				moduleLoop: for (int index = 0; index < remaining.size(); ++index) {
 					Module m = remaining.get(index);
-					System.out.println("module");
-					System.out.println(m.id);
-					System.out.println("missing dependencies");
+
 					for (String dependency : m.dependencies) {
 						// check if dependencies are installed
 						if (!installed.contains(dependency)) {
-							System.out.println(dependency);
 							continue moduleLoop; // does using labels count as "hacky code"
 						}
 					}
 
 					// install module
-					System.out.println("installing" + m.id);
+					System.out.println("Installing " + m.id);
 					writer.println("// DManager: plugin <" + m.id + ">");
 
-					// copy contents to the file
+					// copy contents from plugin js file to the discord file
 					BufferedReader reader = null;
 
 					if (m.builtin) {
-						// this doesn't work for some reason. FileNotFoundException
-						reader = new BufferedReader(new FileReader(m.file));
+						reader = new BufferedReader(new InputStreamReader(m.inputStream));
 					} else {
 						try {
 							reader = new BufferedReader(new InputStreamReader(m.zipFile.getInputStream(m.zipFile.getEntry(m.id + ".js"))));
@@ -211,8 +206,11 @@ public class Main {
 		Module module = new Module();
 
 		if (dmanagerBuiltin) {
-			System.out.println(resourceLocation.replace('.', '/'));
-			module.file = Main.class.getResource("/tk/valoeghese/dmanager/resource/" + resourceLocation.replace('.', '/') + ".js").getFile();
+			module.inputStream = Main.class.getClassLoader().getResourceAsStream("tk/valoeghese/dmanager/resource/" + resourceLocation.replace('.', '/') + ".js");
+
+			if (module.inputStream == null) {
+				throw new RuntimeException("Cannot load InputStream for plugin " + resourceLocation + "!");
+			}
 		}
 
 		module.dependencies = dependencies;
@@ -233,7 +231,7 @@ public class Main {
 
 class Module {
 	ZipFile zipFile; // external module only
-	String file; // internal module only
+	InputStream inputStream; // internal module only
 	String[] dependencies; // common
 	boolean builtin; // common
 	String id; // common
