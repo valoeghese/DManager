@@ -33,6 +33,10 @@ _channelNameMap = {};
 
 function _renameChannel(id, channel, prefix) {
 	if (channel.getAttribute("dmanager_modified") == null) { // check if not flagged as already renamed
+		if (channel.innerHTML == "You do not have permission to send messages in this channel.") {
+			return;
+		}
+		
 		var oldName = channel.innerHTML.substring(prefix.length); // deal with the Message # thing in case of the placeholder
 		var newName = _channelNameMap[oldName];
 		
@@ -65,7 +69,12 @@ setInterval(function() {
 	var currentId = server + ":" + channelTitleElement.innerHTML;
 	
 	_renameChannel(currentId, channelTitleElement, ""); // rename title
-	_renameChannel(currentId, getPlaceholderMessage(), "Message #"); // rename placeholder
+	
+	var placeholderMessage = getPlaceholderMessage(); // rename placeholder
+	
+	if (placeholderMessage != undefined) {
+		_renameChannel(currentId, placeholderMessage, "Message #");
+	}
 	
 	// main loop event
 	for (var i = 0; i < _mls.length; ++i) {
