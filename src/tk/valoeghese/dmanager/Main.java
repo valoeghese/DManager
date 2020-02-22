@@ -50,12 +50,10 @@ public class Main {
 		}
 
 		// check plugin dependencies are satisfied
+		List<Module> remaining = new ArrayList<>();
+
 		for (Module plugin : MODULE_LIST) {
-			for (String dependency : plugin.dependencies) {
-				if (!MODULES.containsKey(dependency)) {
-					throw new RuntimeException("Dependency " + dependency + " is not satisfied for plugin " + plugin.id);
-				}
-			}
+			recursivelyIncludeDependencies(plugin, remaining);
 		}
 
 		// Get default discord js file contents, via using backups of vanilla files (.vanilla)
@@ -92,7 +90,7 @@ public class Main {
 
 		// Proceed to install modules with a maximum of 256 passes to prevent infinite loop
 		int remainingPasses = 255;
-		List<Module> remaining = new ArrayList<>(MODULE_LIST);
+		remaining.addAll(MODULE_LIST);
 		List<String> installed = new ArrayList<>();
 
 		try (PrintWriter writer = new PrintWriter(mainFile)) {
@@ -171,6 +169,21 @@ public class Main {
 		}
 	}
 
+	private static void recursivelyIncludeDependencies(Module plugin, List<Module> toInstall) {
+		for (String dependency : plugin.dependencies) {
+			if (!MODULES.containsKey(dependency)) {
+				throw new RuntimeException("Dependency " + dependency + " is not satisfied for plugin " + plugin.id);
+			}
+			
+			Module m = MODULES.get(dependency);
+
+			if (m.builtin && !m.included) {
+				toInstall.add(m);
+				recursivelyIncludeDependencies(m, toInstall);
+			}
+		}
+	}
+
 	private static BufferedReader openBufferedReader(InputStream is) throws IOException {
 		return new BufferedReader(new InputStreamReader(is));
 	}
@@ -231,7 +244,10 @@ public class Main {
 		}
 
 		MODULES.put(resourceLocation, module);
-		MODULE_LIST.add(module);
+
+		if (!dmanagerBuiltin) {
+			MODULE_LIST.add(module);
+		}
 	}
 
 	private static final Map<String, Module> MODULES = new HashMap<>();
@@ -243,5 +259,6 @@ class Module {
 	URL file; // internal module only
 	String[] dependencies; // common
 	boolean builtin; // common
+	boolean included = false; // internal module only
 	String id; // common
 }
